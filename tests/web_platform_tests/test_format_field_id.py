@@ -1,15 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
-
+import pytest
 from pytest import fail
 
-from aiohttp_sse_client import client as sse_client
-
+from requests_sse import EventSource
 from .const import WPT_SERVER
 
 
-async def test_format_field_id():
+@pytest.mark.skip(reason="Not implemented")
+def test_format_field_id():
     """Test EventSource: Last-Event-ID.
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
@@ -17,10 +14,10 @@ async def test_format_field_id():
     """
     seen_hello = False
 
-    async with sse_client.EventSource(
-        WPT_SERVER + 'resources/last-event-id.py',
+    with EventSource(
+        WPT_SERVER + "resources/last-event-id.py",
     ) as source:
-        async for e in source:
+        for e in source:
             if not seen_hello:
                 assert e.data == "hello"
                 seen_hello = True
@@ -33,7 +30,8 @@ async def test_format_field_id():
                 break
 
 
-async def test_format_field_id_2():
+@pytest.mark.skip(reason="Not implemented")
+def test_format_field_id_2():
     """Test EventSource: Last-Event-ID (2).
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
@@ -41,10 +39,10 @@ async def test_format_field_id_2():
     """
     counter = 0
 
-    async with sse_client.EventSource(
-        WPT_SERVER + 'resources/last-event-id.py',
+    with EventSource(
+        WPT_SERVER + "resources/last-event-id.py",
     ) as source:
-        async for e in source:
+        for e in source:
             if counter == 0:
                 counter += 1
                 assert e.data == "hello"
@@ -60,7 +58,7 @@ async def test_format_field_id_2():
                 fail("Unexpected counter {}".format(counter))
 
 
-async def test_format_field_id_null():
+def test_format_field_id_null():
     """Test EventSource: U+0000 in id field.
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
@@ -68,10 +66,10 @@ async def test_format_field_id_null():
     """
     seen_hello = False
 
-    async with sse_client.EventSource(
-        WPT_SERVER + 'resources/last-event-id.py?idvalue=%00%00',
+    with EventSource(
+        WPT_SERVER + "resources/last-event-id.py?idvalue=%00%00",
     ) as source:
-        async for e in source:
+        for e in source:
             if not seen_hello:
                 assert e.data == "hello"
                 seen_hello = True

@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "requests-sse"
+version = "0.1.0.dev0"
+description = "server-sent events python client library based on requests"
+authors = [
+    "overcat <4catcode@gmail.com>",
+]
+maintainers = ["overcat <4catcode@gmail.com>"]
+readme = "README.rst"
+homepage = "https://github.com/overcat/requests-sse-client"
+repository = "https://github.com/overcat/requests-sse-client"
+documentation = "https://github.com/overcat/requests-sse-client"
+keywords = [
+    "server-sent events",
+    "sse",
+    "stream",
+    "requests",
+]
+license = "Apache License 2.0"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed"
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/overcat/requests-sse-client/issues"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.31.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
+mypy = "^1.6.1"
+types-requests = "^2.31.0.10"
+pytest = "^7.4.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

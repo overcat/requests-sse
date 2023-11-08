@@ -1,1 +1,1 @@
-WPT_SERVER = 'http://www.w3c-test.org/eventsource/'
+WPT_SERVER = "https://wpt.live/eventsource/"
