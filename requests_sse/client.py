@@ -209,7 +209,7 @@ class EventSource:
             response = self._session.request(
                 method=self._method, url=self.url, stream=True, **self._kwargs
             )
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             if retry <= 0 or self._ready_state == ReadyState.CLOSED:
                 self._fail_connect()
                 raise
