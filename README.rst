@@ -5,16 +5,14 @@ requests-sse
 .. image:: https://img.shields.io/github/actions/workflow/status/overcat/requests-sse/test-deploy.yml?branch=main
     :alt: GitHub Workflow Status
     :target: https://github.com/overcat/requests-sse/actions
-
 .. image:: https://img.shields.io/pypi/v/requests-sse.svg
     :alt: PyPI
     :target: https://pypi.python.org/pypi/requests-sse
-
 .. image:: https://img.shields.io/badge/python-%3E%3D3.8-blue
     :alt: Python - Version
     :target: https://pypi.python.org/pypi/stellar-sdk
 
-A Server-Sent Event python client based on requests, provides a simple interface to process `Server-Sent Event <https://www.w3.org/TR/eventsource>`_.
+A Server-Sent Events python client based on requests, provides a simple interface to process `Server-Sent Event <https://www.w3.org/TR/eventsource>`_.
 
 Installation
 ------------

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "requests-sse"
-version = "0.1.0"
+version = "0.2.0"
 description = "server-sent events python client library based on requests"
 authors = [
     "overcat <4catcode@gmail.com>",
