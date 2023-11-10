@@ -4,7 +4,7 @@ from requests_sse import EventSource, ReadyState
 from .const import WPT_SERVER
 
 
-def test_rquest_accept():
+def test_request_accept():
     """Test EventSource: Accept header.
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
@@ -18,7 +18,7 @@ def test_rquest_accept():
     source.close()
 
 
-def test_rquest_cache_control():
+def test_request_cache_control():
     """Test EventSource: Cache-Control.
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
@@ -32,7 +32,7 @@ def test_rquest_cache_control():
     source.close()
 
 
-def test_rquest_redirect():
+def test_request_redirect():
     """Test EventSource: redirect.
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
@@ -64,7 +64,7 @@ def test_rquest_redirect():
     test(307)
 
 
-def test_rquest_status_error():
+def test_request_status_error():
     """Test EventSource: redirect.
 
     ..seealso: https://github.com/web-platform-tests/wpt/blob/master/
