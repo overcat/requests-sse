@@ -1,3 +1,4 @@
+import copy
 import logging
 import time
 from dataclasses import dataclass
@@ -112,7 +113,7 @@ class EventSource:
         self._max_connect_retry = max_connect_retry
         self._timeout = timeout
         self._last_event_id = ""
-        self._kwargs = kwargs
+        self._kwargs = copy.deepcopy(kwargs)
 
         if "headers" not in self._kwargs:
             self._kwargs["headers"] = dict()
@@ -211,10 +212,9 @@ class EventSource:
     def connect(self, retry: int = 0) -> None:
         """Connect to resource."""
         _LOGGER.debug(f"connect, retry={retry}")
-        headers = self._kwargs["headers"]
 
         if self._last_event_id != "":
-            headers["Last-Event-Id"] = self._last_event_id
+            self._kwargs["headers"]["Last-Event-Id"] = self._last_event_id
 
         try:
             response = self._session.request(
