@@ -33,6 +33,7 @@ class MessageEvent:
     """Represents MessageEvent Interface.
 
     See `MDN - EventSource: instance properties <https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent#instance_properties>`__ for more information.
+    See `Event types <https://javascript.info/server-sent-events#event-types>` for more information.
     """
 
     type: Optional[str]
@@ -314,7 +315,7 @@ class EventSource:
             last_event_id=self._last_event_id,
         )
         _LOGGER.debug(message)
-        if self._on_message:
+        if self._on_message and self._event_type == "message":
             self._on_message(message)
 
         self._event_type = None
@@ -327,6 +328,10 @@ class EventSource:
             self._event_type = field_value
 
         elif field_name == "data":
+            # by default, the event type is "message"
+            if self._event_type is None:
+                self._event_type = "message"
+
             if self._event_data is None:
                 self._event_data = field_value
             else:
