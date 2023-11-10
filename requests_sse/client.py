@@ -68,6 +68,9 @@ class EventSource:
         should be established
     :param reconnection_time: wait time before try to reconnect in case
         connection broken
+    :param max_connect_retry: maximum number of retries to connect
+    :param timeout: how long to wait for the server to send data before giving up,
+        I recommend that you set a reasonable value based on actual needs, which will improve stability
     :param session: specifies a requests.Session, if not, create
         a default requests.Session
     :param on_open: event handler for open event
@@ -82,6 +85,7 @@ class EventSource:
         option: Optional[Dict[str, Any]] = None,
         reconnection_time: timedelta = DEFAULT_RECONNECTION_TIME,
         max_connect_retry: int = DEFAULT_MAX_CONNECT_RETRY,
+        timeout: Optional[float] = None,
         session: Optional[Session] = None,
         on_open: Optional[Callable[[], None]] = None,
         on_message: Optional[Callable[[MessageEvent], None]] = None,
@@ -105,6 +109,7 @@ class EventSource:
         self._reconnection_time = reconnection_time
         self._orginal_reconnection_time = reconnection_time
         self._max_connect_retry = max_connect_retry
+        self._timeout = timeout
         self._last_event_id = ""
         self._kwargs = kwargs
 
@@ -163,6 +168,11 @@ class EventSource:
                     self._event_type = None
                     self._event_data = None
                     break
+                except requests.RequestException as e:
+                    _LOGGER.error("requests exception", exc_info=e)
+                    self._event_type = None
+                    self._event_data = None
+                    break
 
                 line: str = line_in_bytes.decode("utf8")
                 line = line.rstrip("\n").rstrip("\r")
@@ -191,7 +201,7 @@ class EventSource:
                 self._on_error()
             self._reconnection_time *= 2
             _LOGGER.debug(
-                "wait %s seconds for retry", self._reconnection_time.total_seconds()
+                "wait %s seconds for reconnect", self._reconnection_time.total_seconds()
             )
             time.sleep(self._reconnection_time.total_seconds())
             self.connect(self._max_connect_retry)
@@ -207,9 +217,13 @@ class EventSource:
 
         try:
             response = self._session.request(
-                method=self._method, url=self.url, stream=True, **self._kwargs
+                method=self._method,
+                url=self.url,
+                stream=True,
+                timeout=self._timeout,
+                **self._kwargs,
             )
-        except requests.exceptions.ConnectionError:
+        except requests.RequestException:
             if retry <= 0 or self._ready_state == ReadyState.CLOSED:
                 self._fail_connect()
                 raise
