@@ -7,9 +7,9 @@ authors = [
 ]
 maintainers = ["overcat <4catcode@gmail.com>"]
 readme = "README.rst"
-homepage = "https://github.com/overcat/requests-sse-client"
-repository = "https://github.com/overcat/requests-sse-client"
-documentation = "https://github.com/overcat/requests-sse-client"
+homepage = "https://github.com/overcat/requests-sse"
+repository = "https://github.com/overcat/requests-sse"
+documentation = "https://github.com/overcat/requests-sse"
 keywords = [
     "server-sent events",
     "sse",
@@ -32,7 +32,7 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/overcat/requests-sse-client/issues"
+"Bug Tracker" = "https://github.com/overcat/requests-sse/issues"
 
 [tool.poetry.dependencies]
 python = "^3.8"
