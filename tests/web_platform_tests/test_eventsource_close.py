@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from requests_sse import EventSource, ReadyState
+from requests_sse import EventSource, ReadyState, InvalidStatusCodeError
 from .const import WPT_SERVER
 
 
@@ -58,5 +58,5 @@ def test_eventsource_close_reconnect():
                 else:
                     assert False
                 count += 1
-        except ConnectionError:
+        except InvalidStatusCodeError:
             pass
