@@ -64,10 +64,7 @@ class EventSource:
     See `MDN - EventSource <https://developer.mozilla.org/en-US/docs/Web/API/EventSource>`__ for more information.
 
     :param url: specifies the URL to which to connect
-    :param option: specifies the settings, if any,
-        in the form of a Dict[str, Any]. Accept the "method" key for
-        specifying the HTTP method with which connection
-        should be established
+    :param method: specifies the HTTP method with which connection should be established
     :param reconnection_time: wait time before try to reconnect in case
         connection broken
     :param max_connect_retry: maximum number of retries to connect
