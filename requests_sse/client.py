@@ -84,7 +84,7 @@ class EventSource:
     def __init__(
         self,
         url: str,
-        option: Optional[Dict[str, Any]] = None,
+        method: str = "GET",
         reconnection_time: timedelta = DEFAULT_RECONNECTION_TIME,
         max_connect_retry: int = DEFAULT_MAX_CONNECT_RETRY,
         timeout: Optional[float] = None,
@@ -128,7 +128,7 @@ class EventSource:
         self._response: Optional[requests.Response] = None
         self._data_generator: Optional[Iterator] = None
 
-        self._method = "GET" if option is None else option.get("method", "GET")
+        self._method = method
 
     def __enter__(self):
         """Connect and listen Server-Sent Event."""
