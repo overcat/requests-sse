@@ -1,6 +1,6 @@
 import pytest
 
-from requests_sse import EventSource, ReadyState
+from requests_sse import EventSource, ReadyState, InvalidStatusCodeError
 from .const import WPT_SERVER
 
 
@@ -83,8 +83,9 @@ def test_request_status_error():
             on_message=on_message,
             on_error=on_error,
         )
-        with pytest.raises(ConnectionError):
+        with pytest.raises(InvalidStatusCodeError) as e:
             source.connect()
+        assert e.value.status_code == status
 
     test(204)
     test(205)

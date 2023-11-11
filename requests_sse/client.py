@@ -7,15 +7,37 @@ from enum import IntEnum
 from typing import Optional, Dict, Any, Callable, Iterator
 
 import requests
-from requests import Session
 from urllib3.util import parse_url, Url
 
-__all__ = ["ReadyState", "EventSource", "MessageEvent"]
+__all__ = [
+    "ReadyState",
+    "EventSource",
+    "MessageEvent",
+    "InvalidStatusCodeError",
+    "InvalidContentTypeError",
+]
 
 DEFAULT_RECONNECTION_TIME = timedelta(seconds=5)
 DEFAULT_MAX_CONNECT_RETRY = 5
 _CONTENT_TYPE_EVENT_STREAM = "text/event-stream"
+_CONTENT_TYPE_EVENT_STREAM_UTF_8 = "text/event-stream; charset=utf-8"
 _LOGGER = logging.getLogger(__name__)
+
+
+class InvalidStatusCodeError(requests.RequestException):
+    """Invalid status code error."""
+
+    def __init__(self, status_code: int, *args, **kwargs):
+        self.status_code = status_code
+        requests.RequestException.__init__(self, *args, **kwargs)
+
+
+class InvalidContentTypeError(requests.RequestException):
+    """Invalid content type error."""
+
+    def __init__(self, content_type: Optional[str], *args, **kwargs):
+        self.content_type = content_type
+        requests.RequestException.__init__(self, *args, **kwargs)
 
 
 class ReadyState(IntEnum):
@@ -79,6 +101,10 @@ class EventSource:
     :param on_message: event handler for message event
     :param on_error: event handler for error event
     :param kwargs: keyword arguments will pass to underlying requests.request() method.
+
+    :raises InvalidStatusCodeError: if status code is not 200
+    :raises InvalidContentTypeError: if content type is not 'text/event-stream' or 'text/event-stream;charset=utf-8'
+    :raises requests.RequestException: if connection failed
     """
 
     def __init__(
@@ -88,7 +114,7 @@ class EventSource:
         reconnection_time: timedelta = DEFAULT_RECONNECTION_TIME,
         max_connect_retry: int = DEFAULT_MAX_CONNECT_RETRY,
         timeout: Optional[float] = None,
-        session: Optional[Session] = None,
+        session: Optional[requests.Session] = None,
         on_open: Optional[Callable[[], None]] = None,
         on_message: Optional[Callable[[MessageEvent], None]] = None,
         on_error: Optional[Callable[[], None]] = None,
@@ -101,7 +127,7 @@ class EventSource:
             self._session = session
             self._need_close_session = False
         else:
-            self._session = Session()
+            self._session = requests.Session()
             self._need_close_session = True
 
         self._on_open = on_open
@@ -162,7 +188,7 @@ class EventSource:
         if not self._data_generator:
             raise ValueError("data_generator is None")
 
-        while self._response.status_code != 204:
+        while True:
             while True:
                 try:
                     line_in_bytes = next(self._data_generator)
@@ -207,7 +233,6 @@ class EventSource:
             )
             time.sleep(self._reconnection_time.total_seconds())
             self.connect(self._max_connect_retry)
-        raise StopIteration
 
     def connect(self, retry: int = 0) -> None:
         """Connect to resource."""
@@ -240,35 +265,30 @@ class EventSource:
                 self.connect(retry - 1)
             return
 
-        if response.status_code >= 400 or response.status_code == 305:
-            error_message = "fetch {} failed: {}".format(
-                self._url, response.status_code
-            )
-            _LOGGER.error(error_message)
-
-            self._fail_connect()
-
-            if response.status_code in [305, 401, 407]:
-                raise ConnectionRefusedError(error_message)
-            raise ConnectionError(error_message)
-
         if response.status_code != 200:
             error_message = "fetch {} failed with wrong response status: {}".format(
                 self._url, response.status_code
             )
             _LOGGER.error(error_message)
             self._fail_connect()
-            raise ConnectionAbortedError(error_message)
+            raise InvalidStatusCodeError(
+                response.status_code, error_message, response=response
+            )
 
-        if _CONTENT_TYPE_EVENT_STREAM not in response.headers["content-type"].lower():
+        content_type = response.headers.get("Content-Type")
+        if not content_type or content_type.lower() not in (
+            _CONTENT_TYPE_EVENT_STREAM,
+            _CONTENT_TYPE_EVENT_STREAM_UTF_8,
+        ):
             error_message = "fetch {} failed with wrong Content-Type: {}".format(
                 self._url, response.headers.get("Content-Type")
             )
             _LOGGER.error(error_message)
-
             self._fail_connect()
-            raise ConnectionAbortedError(error_message)
-        # only status == 200 and content_type is 'text/event-stream'
+            raise InvalidContentTypeError(
+                content_type, error_message, response=response
+            )
+        # only status == 200 and content_type is 'text/event-stream' or 'text/event-stream;charset=utf-8' can reach here
         self._connected()
         self._response = response
         self._data_generator = response.iter_lines()
