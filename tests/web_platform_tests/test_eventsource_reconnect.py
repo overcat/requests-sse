@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from requests_sse import EventSource, ReadyState
+
 from .const import WPT_SERVER
 
 

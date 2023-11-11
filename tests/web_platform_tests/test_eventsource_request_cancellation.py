@@ -1,6 +1,7 @@
 import time
 
 from requests_sse import EventSource, ReadyState
+
 from .const import WPT_SERVER
 
 
@@ -32,4 +33,3 @@ def test_eventsource_request_cancellation():
         closed = True
         time.sleep(1)
         assert source.ready_state == ReadyState.CLOSED
-        pass
