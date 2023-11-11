@@ -86,10 +86,7 @@ class EventSource:
     See `MDN - EventSource <https://developer.mozilla.org/en-US/docs/Web/API/EventSource>`__ for more information.
 
     :param url: specifies the URL to which to connect
-    :param option: specifies the settings, if any,
-        in the form of a Dict[str, Any]. Accept the "method" key for
-        specifying the HTTP method with which connection
-        should be established
+    :param method: specifies the HTTP method with which connection should be established
     :param reconnection_time: wait time before try to reconnect in case
         connection broken
     :param max_connect_retry: maximum number of retries to connect
@@ -110,7 +107,7 @@ class EventSource:
     def __init__(
         self,
         url: str,
-        option: Optional[Dict[str, Any]] = None,
+        method: str = "GET",
         reconnection_time: timedelta = DEFAULT_RECONNECTION_TIME,
         max_connect_retry: int = DEFAULT_MAX_CONNECT_RETRY,
         timeout: Optional[float] = None,
@@ -154,7 +151,7 @@ class EventSource:
         self._response: Optional[requests.Response] = None
         self._data_generator: Optional[Iterator] = None
 
-        self._method = "GET" if option is None else option.get("method", "GET")
+        self._method = method
 
     def __enter__(self):
         """Connect and listen Server-Sent Event."""

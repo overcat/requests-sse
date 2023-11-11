@@ -97,8 +97,8 @@ def test_request_status_error():
 
 
 def test_request_post_to_connect():
-    """Test EventSource option method for connection."""
-    source = EventSource(WPT_SERVER + "resources/message.py", option={"method": "POST"})
+    """Test EventSource post method for connection."""
+    source = EventSource(WPT_SERVER + "resources/message.py", method="POST")
     source.connect()
     for e in source:
         assert e.data == "data"
