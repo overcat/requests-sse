@@ -91,7 +91,8 @@ class EventSource:
         connection broken
     :param max_connect_retry: maximum number of retries to connect
     :param timeout: how long to wait for the server to send data before giving up,
-        I recommend that you set a reasonable value based on actual needs, which will improve stability
+        I recommend that you set a reasonable value based on actual needs, which will improve stability,
+        see https://docs.python-requests.org/en/latest/user/quickstart/#timeouts for more information
     :param session: specifies a requests.Session, if not, create
         a default requests.Session
     :param on_open: event handler for open event
