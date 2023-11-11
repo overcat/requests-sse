@@ -4,8 +4,7 @@ import time
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import IntEnum
-from typing import Optional, Dict, Any, Callable, Iterator
-
+from typing import Optional, Callable, Iterator
 import requests
 from urllib3.util import parse_url, Url
 
@@ -74,13 +73,18 @@ class EventSource:
 
     An example::
 
-        from requests_sse import EventSource
+        import requests
+        from requests_sse import EventSource, InvalidStatusCodeError, InvalidContentTypeError
 
-        with EventSource("https://stream.wikimedia.org/v2/stream/recentchange") as event_source:
+        with EventSource("https://stream.wikimedia.org/v2/stream/recentchange", timeout=30) as event_source:
             try:
                 for event in event_source:
                     print(event)
-            except ConnectionError:
+            except InvalidStatusCodeError:
+                pass
+            except InvalidContentTypeError:
+                pass
+            except requests.RequestException:
                 pass
 
     See `MDN - EventSource <https://developer.mozilla.org/en-US/docs/Web/API/EventSource>`__ for more information.

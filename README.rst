@@ -24,13 +24,18 @@ Usage
 -----
 .. code-block:: python
 
-    from requests_sse import EventSource
+    import requests
+    from requests_sse import EventSource, InvalidStatusCodeError, InvalidContentTypeError
 
-    with EventSource("https://stream.wikimedia.org/v2/stream/recentchange") as event_source:
+    with EventSource("https://stream.wikimedia.org/v2/stream/recentchange", timeout=30) as event_source:
         try:
             for event in event_source:
                 print(event)
-        except ConnectionError:
+        except InvalidStatusCodeError:
+            pass
+        except InvalidContentTypeError:
+            pass
+        except requests.RequestException:
             pass
 
 Credits
