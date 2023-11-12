@@ -2,6 +2,7 @@ import pytest
 from pytest import fail
 
 from requests_sse import EventSource
+
 from .const import WPT_SERVER
 
 

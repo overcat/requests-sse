@@ -4,9 +4,10 @@ import time
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import IntEnum
-from typing import Optional, Callable, Iterator
+from typing import Callable, Iterator, Optional
+
 import requests
-from urllib3.util import parse_url, Url
+from urllib3.util import Url, parse_url
 
 __all__ = [
     "ReadyState",
@@ -371,8 +372,6 @@ class EventSource:
                 _LOGGER.warning(
                     "Received invalid retry value %s, ignore it", field_value
                 )
-                pass
-        pass
 
     @staticmethod
     def _get_origin(response: requests.Response) -> str:

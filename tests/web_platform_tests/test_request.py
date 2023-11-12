@@ -1,6 +1,7 @@
 import pytest
 
-from requests_sse import EventSource, ReadyState, InvalidStatusCodeError
+from requests_sse import EventSource, InvalidStatusCodeError, ReadyState
+
 from .const import WPT_SERVER
 
 

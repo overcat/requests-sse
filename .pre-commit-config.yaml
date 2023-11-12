@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/PyCQA/autoflake
+    rev: "v2.2.1"
+    hooks:
+      - id: autoflake
+        args: [--in-place, --ignore-init-module-imports, --remove-all-unused-imports]
+
+  - repo: https://github.com/pycqa/isort
+    rev: "5.12.0"
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.6.1'
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests==2.31.0.10]
