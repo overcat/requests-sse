@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 
 from requests_sse import EventSource, InvalidStatusCodeError, ReadyState
@@ -33,6 +35,8 @@ def test_request_cache_control():
     source.close()
 
 
+# https://github.com/dask/distributed/issues/5607
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
 def test_request_redirect():
     """Test EventSource: redirect.
 
