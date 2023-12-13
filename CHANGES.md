@@ -1,5 +1,11 @@
 # Changes
 
+## Version 0.3.1
+
+Released 2023-12-13
+
+- chore: add support for Python 3.7. ([#12](https://github.com/overcat/requests-sse/pull/12))
+ 
 ## Version 0.3.0
 
 Released 2023-11-12
