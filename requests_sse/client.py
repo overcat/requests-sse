@@ -20,7 +20,7 @@ __all__ = [
 DEFAULT_RECONNECTION_TIME = timedelta(seconds=5)
 DEFAULT_MAX_CONNECT_RETRY = 5
 _CONTENT_TYPE_EVENT_STREAM = "text/event-stream"
-_CONTENT_TYPE_EVENT_STREAM_UTF_8 = "text/event-stream; charset=utf-8"
+_CONTENT_TYPE_EVENT_STREAM_UTF_8 = "text/event-stream;charset=utf-8"
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -279,7 +279,7 @@ class EventSource:
             )
 
         content_type = response.headers.get("Content-Type")
-        if not content_type or content_type.lower() not in (
+        if not content_type or content_type.lower().replace(" ", "") not in (
             _CONTENT_TYPE_EVENT_STREAM,
             _CONTENT_TYPE_EVENT_STREAM_UTF_8,
         ):
