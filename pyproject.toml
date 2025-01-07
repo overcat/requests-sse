@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "requests-sse"
-version = "0.3.2"
+version = "0.4.0"
 description = "server-sent events python client library based on requests"
 authors = ["overcat <4catcode@gmail.com>"]
 maintainers = ["overcat <4catcode@gmail.com>"]
@@ -29,7 +29,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-requests = "^2.31.0"
+requests = ">=2.0.0,<3.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "*"
