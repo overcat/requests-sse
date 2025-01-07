@@ -5,7 +5,7 @@
 Released 2025-01-07
 
 - fix: close session in `EventSource.close()` instead of `EventSource.__exit__()` ([#17](https://github.com/overcat/requests-sse/pull/17))
-- chore: drop support for Python 3.7.
+- chore: drop support for Python 3.7. You may still be able to use this library on Python 3.7, but we are not testing it and are no longer sure if it will work well.
 
 ## Version 0.3.2
 
