@@ -8,7 +8,7 @@ requests-sse
 .. image:: https://img.shields.io/pypi/v/requests-sse.svg
     :alt: PyPI
     :target: https://pypi.python.org/pypi/requests-sse
-.. image:: https://img.shields.io/badge/python-%3E%3D37-blue
+.. image:: https://img.shields.io/badge/python-%3E%3D3.8-blue
     :alt: Python - Version
     :target: https://pypi.python.org/pypi/stellar-sdk
 
