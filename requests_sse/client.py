@@ -165,10 +165,8 @@ class EventSource:
         return self
 
     def __exit__(self, *exc):
-        """Close connection and session if needed."""
+        """Call closing methods."""
         self.close()
-        if self._need_close_session:
-            self._session.close()
 
     @property
     def url(self) -> str:
@@ -298,13 +296,20 @@ class EventSource:
         self._origin = self._get_origin(response)
 
     def close(self) -> None:
-        """Close connection."""
+        """Close connection and session if needed.
+
+        Must be called if EventSource is not called as context manager.
+        This also enables EventSource to be used with contextlib.closing
+        context manager.
+        """
         _LOGGER.debug("close")
         self._ready_state = ReadyState.CLOSED
         if self._response is not None:
             self._response.close()
             self._response = None
             self._data_generator = None
+        if self._need_close_session:
+            self._session.close()
 
     def _connected(self):
         """Announce the connection is made."""
