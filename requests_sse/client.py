@@ -198,7 +198,12 @@ class EventSource:
                     self._event_data = None
                     break
                 except requests.RequestException as e:
-                    _LOGGER.debug("Failed to read next line from event stream at %s: %s",self._url, str(e), exc_info=e)
+                    _LOGGER.debug(
+                        "Failed to read next line from event stream at %s: %s",
+                        self._url,
+                        str(e),
+                        exc_info=e,
+                    )
                     self._event_type = None
                     self._event_data = None
                     break
@@ -372,9 +377,7 @@ class EventSource:
                 retry_in_ms = int(field_value)
                 self._reconnection_time = timedelta(milliseconds=retry_in_ms)
             except ValueError:
-                _LOGGER.debug(
-                    "Received invalid retry value %s, ignore it", field_value
-                )
+                _LOGGER.debug("Received invalid retry value %s, ignore it", field_value)
 
     @staticmethod
     def _get_origin(response: requests.Response) -> str:
