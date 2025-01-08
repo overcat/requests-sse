@@ -103,6 +103,7 @@ class EventSource:
     :param on_open: event handler for open event
     :param on_message: event handler for message event
     :param on_error: event handler for error event
+    :param latest_event_id: specifies the last event ID value of the connection
     :param kwargs: keyword arguments will pass to underlying requests.request() method.
 
     :raises InvalidStatusCodeError: if status code is not 200
@@ -121,6 +122,7 @@ class EventSource:
         on_open: Optional[Callable[[], None]] = None,
         on_message: Optional[Callable[[MessageEvent], None]] = None,
         on_error: Optional[Callable[[], None]] = None,
+        latest_event_id: Optional[str] = None,
         **kwargs,
     ):
         self._url = url
@@ -141,7 +143,7 @@ class EventSource:
         self._orginal_reconnection_time = reconnection_time
         self._max_connect_retry = max_connect_retry
         self._timeout = timeout
-        self._last_event_id = ""
+        self._last_event_id = "" if latest_event_id is None else latest_event_id
         self._kwargs = copy.deepcopy(kwargs)
 
         if "headers" not in self._kwargs:
