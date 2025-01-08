@@ -198,7 +198,12 @@ class EventSource:
                     self._event_data = None
                     break
                 except requests.RequestException as e:
-                    _LOGGER.error("requests exception", exc_info=e)
+                    _LOGGER.debug(
+                        "Failed to read next line from event stream at %s: %s",
+                        self._url,
+                        str(e),
+                        exc_info=e,
+                    )
                     self._event_type = None
                     self._event_data = None
                     break
@@ -270,7 +275,6 @@ class EventSource:
             error_message = "fetch {} failed with wrong response status: {}".format(
                 self._url, response.status_code
             )
-            _LOGGER.error(error_message)
             self._fail_connect()
             raise InvalidStatusCodeError(
                 response.status_code, error_message, response=response
@@ -284,7 +288,6 @@ class EventSource:
             error_message = "fetch {} failed with wrong Content-Type: {}".format(
                 self._url, response.headers.get("Content-Type")
             )
-            _LOGGER.error(error_message)
             self._fail_connect()
             raise InvalidContentTypeError(
                 content_type, error_message, response=response
@@ -342,7 +345,7 @@ class EventSource:
             origin=self._origin,
             last_event_id=self._last_event_id,
         )
-        _LOGGER.debug(message)
+        _LOGGER.debug(f"message: {message}")
         if self._on_message and self._event_type == "message":
             self._on_message(message)
 
@@ -374,9 +377,7 @@ class EventSource:
                 retry_in_ms = int(field_value)
                 self._reconnection_time = timedelta(milliseconds=retry_in_ms)
             except ValueError:
-                _LOGGER.warning(
-                    "Received invalid retry value %s, ignore it", field_value
-                )
+                _LOGGER.debug("Received invalid retry value %s, ignore it", field_value)
 
     @staticmethod
     def _get_origin(response: requests.Response) -> str:
