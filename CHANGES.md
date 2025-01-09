@@ -1,5 +1,12 @@
 # Changes
 
+## Version 0.5.0
+
+Released 2025-01-09
+
+- chore: change the log level. ([#21](https://github.com/overcat/requests-sse/pull/21))
+- feat: allow users to set `latest_event_id` during initialization. ([#24](https://github.com/overcat/requests-sse/pull/24))
+
 ## Version 0.4.0
 
 Released 2025-01-07
