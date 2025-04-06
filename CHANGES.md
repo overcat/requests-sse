@@ -1,5 +1,11 @@
 # Changes
 
+## Version 0.5.1
+
+Released 2025-04-06
+
+- chore: add typings for `__enter__` and `__exit__`. ([#26](https://github.com/overcat/requests-sse/pull/26))
+
 ## Version 0.5.0
 
 Released 2025-01-09
