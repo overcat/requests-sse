@@ -4,7 +4,8 @@ import time
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import IntEnum
-from typing import Callable, Iterator, Optional
+from types import TracebackType
+from typing import Callable, Iterator, Optional, Type
 
 import requests
 from urllib3.util import Url, parse_url
@@ -161,12 +162,17 @@ class EventSource:
 
         self._method = method
 
-    def __enter__(self):
+    def __enter__(self) -> 'EventSource':
         """Connect and listen Server-Sent Event."""
         self.connect(self._max_connect_retry)
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         """Call closing methods."""
         self.close()
 
