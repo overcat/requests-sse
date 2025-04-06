@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from enum import IntEnum
 from types import TracebackType
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, Optional, Type
 
 import requests
 from urllib3.util import Url, parse_url
@@ -169,7 +169,7 @@ class EventSource:
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
+        exc_type: Optional[Type[BaseException]],
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
