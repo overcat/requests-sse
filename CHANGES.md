@@ -1,5 +1,11 @@
 # Changes
 
+## Version 0.5.2
+
+Released 2025-06-17
+
+- fix: add `py.typed` to the package. ([#28](https://github.com/overcat/requests-sse/pull/28))
+
 ## Version 0.5.1
 
 Released 2025-04-06
