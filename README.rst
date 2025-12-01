@@ -12,7 +12,7 @@ requests-sse
     :alt: Python - Version
     :target: https://pypi.python.org/pypi/stellar-sdk
 
-A Server-Sent Events python client based on requests, provides a simple interface to process `Server-Sent Events <https://www.w3.org/TR/eventsource>`_.
+A Server-Sent Events python client based on requests, provides a simple interface to process `Server-Sent Events <https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events>`_.
 
 Installation
 ------------
