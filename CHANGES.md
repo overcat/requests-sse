@@ -1,5 +1,11 @@
 # Changes
 
+## Version 0.5.3
+
+Released 2026-03-11
+
+- fix: only check the MIME type essence when validating Content-Type, ignoring parameters like charset. ([#30](https://github.com/overcat/requests-sse/issues/30))
+
 ## Version 0.5.2
 
 Released 2025-06-17
