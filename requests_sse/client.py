@@ -20,8 +20,20 @@ __all__ = [
 
 DEFAULT_RECONNECTION_TIME = timedelta(seconds=5)
 DEFAULT_MAX_CONNECT_RETRY = 5
-_CONTENT_TYPE_EVENT_STREAM = "text/event-stream"
-_CONTENT_TYPE_EVENT_STREAM_UTF_8 = "text/event-stream;charset=utf-8"
+
+# The main content type
+CONTENT_TYPE_BASE = "text/event-stream"
+
+# Additional content type parameters that are okay
+CONTENT_TYPE_SUPERSET = {
+    CONTENT_TYPE_BASE,
+    "charset=utf-8",
+    "charset=UTF-8",
+    }
+
+# What separates content type parameters
+CONTENT_TYPE_SEP = ";"
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -149,7 +161,7 @@ class EventSource:
 
         if "headers" not in self._kwargs:
             self._kwargs["headers"] = dict()
-        self._kwargs["headers"]["Accept"] = _CONTENT_TYPE_EVENT_STREAM
+        self._kwargs["headers"]["Accept"] = CONTENT_TYPE_BASE
         self._kwargs["headers"]["Cache-Control"] = "no-cache"
 
         self._event_id = ""
@@ -288,11 +300,10 @@ class EventSource:
                 response.status_code, error_message, response=response
             )
 
-        content_type = response.headers.get("Content-Type")
-        if not content_type or content_type.lower().replace(" ", "") not in (
-            _CONTENT_TYPE_EVENT_STREAM,
-            _CONTENT_TYPE_EVENT_STREAM_UTF_8,
-        ):
+        content_type = set(response.headers.get("Content-Type").replace(" ", "").split(CONTENT_TYPE_SEP))
+
+        # If there was no content type header, it didn't have the base content type requirement, or it contained invalid parameters
+        if not content_type or CONTENT_TYPE_BASE not in content_type or not CONTENT_TYPE_SUPERSET.issuperset(content_type):
             error_message = "fetch {} failed with wrong Content-Type: {}".format(
                 self._url, response.headers.get("Content-Type")
             )
