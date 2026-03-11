@@ -8,7 +8,8 @@ def test_basic_usage():
     """Test basic usage."""
     messages = []
     with EventSource(
-        "https://stream.wikimedia.org/v2/stream/recentchange"
+        "https://stream.wikimedia.org/v2/stream/recentchange",
+        headers={"User-Agent": "requests-sse test"},
     ) as event_source:
         for message in event_source:
             if len(messages) > 1:
