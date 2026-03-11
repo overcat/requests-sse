@@ -21,7 +21,6 @@ __all__ = [
 DEFAULT_RECONNECTION_TIME = timedelta(seconds=5)
 DEFAULT_MAX_CONNECT_RETRY = 5
 _CONTENT_TYPE_EVENT_STREAM = "text/event-stream"
-_CONTENT_TYPE_EVENT_STREAM_UTF_8 = "text/event-stream;charset=utf-8"
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -108,7 +107,7 @@ class EventSource:
     :param kwargs: keyword arguments will pass to underlying requests.request() method.
 
     :raises InvalidStatusCodeError: if status code is not 200
-    :raises InvalidContentTypeError: if content type is not 'text/event-stream' or 'text/event-stream;charset=utf-8'
+    :raises InvalidContentTypeError: if content type is not 'text/event-stream'
     :raises requests.RequestException: if connection failed
     """
 
@@ -162,7 +161,7 @@ class EventSource:
 
         self._method = method
 
-    def __enter__(self) -> 'EventSource':
+    def __enter__(self) -> "EventSource":
         """Connect and listen Server-Sent Event."""
         self.connect(self._max_connect_retry)
         return self
@@ -289,9 +288,12 @@ class EventSource:
             )
 
         content_type = response.headers.get("Content-Type")
-        if not content_type or content_type.lower().replace(" ", "") not in (
-            _CONTENT_TYPE_EVENT_STREAM,
-            _CONTENT_TYPE_EVENT_STREAM_UTF_8,
+        # Per the WHATWG spec, we only check the MIME type essence (type/subtype),
+        # ignoring parameters like charset.
+        # See https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
+        if (
+            not content_type
+            or content_type.lower().split(";")[0].strip() != _CONTENT_TYPE_EVENT_STREAM
         ):
             error_message = "fetch {} failed with wrong Content-Type: {}".format(
                 self._url, response.headers.get("Content-Type")
@@ -300,7 +302,6 @@ class EventSource:
             raise InvalidContentTypeError(
                 content_type, error_message, response=response
             )
-        # only status == 200 and content_type is 'text/event-stream' or 'text/event-stream;charset=utf-8' can reach here
         self._connected()
         self._response = response
         self._data_generator = response.iter_lines()
