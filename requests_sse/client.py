@@ -101,7 +101,8 @@ class EventSource:
     :param session: specifies a requests.Session, if not, create
         a default requests.Session
     :param on_open: event handler for open event
-    :param on_message: event handler for message event
+    :param on_message: event handler for message event, only called when
+        the event type is "message"
     :param on_error: event handler for error event
     :param latest_event_id: specifies the last event ID value of the connection
     :param kwargs: keyword arguments will pass to underlying requests.request() method.
@@ -354,6 +355,8 @@ class EventSource:
             return
 
         self._event_data = self._event_data.rstrip("\n")
+        if self._event_type is None:
+            self._event_type = "message"
 
         message = MessageEvent(
             type=self._event_type,
@@ -362,6 +365,7 @@ class EventSource:
             last_event_id=self._last_event_id,
         )
         _LOGGER.debug(f"message: {message}")
+        # Match the EventSource onmessage callback behavior.
         if self._on_message and self._event_type == "message":
             self._on_message(message)
 
@@ -375,10 +379,6 @@ class EventSource:
             self._event_type = field_value
 
         elif field_name == "data":
-            # by default, the event type is "message"
-            if self._event_type is None:
-                self._event_type = "message"
-
             if self._event_data is None:
                 self._event_data = field_value
             else:
