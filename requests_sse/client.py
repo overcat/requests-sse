@@ -1,5 +1,6 @@
 import copy
 import logging
+import socket
 import time
 from dataclasses import dataclass
 from datetime import timedelta
@@ -8,6 +9,7 @@ from types import TracebackType
 from typing import Callable, Iterator, Optional, Type
 
 import requests
+from urllib3.exceptions import ReadTimeoutError
 from urllib3.util import Url, parse_url
 
 __all__ = [
@@ -22,6 +24,39 @@ DEFAULT_RECONNECTION_TIME = timedelta(seconds=5)
 DEFAULT_MAX_CONNECT_RETRY = 5
 _CONTENT_TYPE_EVENT_STREAM = "text/event-stream"
 _LOGGER = logging.getLogger(__name__)
+
+
+def _iter_exception_chain(exc: BaseException) -> Iterator[BaseException]:
+    """Yield exceptions reachable from args/cause/context without looping."""
+    stack = [exc]
+    seen = set()
+
+    while stack:
+        current = stack.pop()
+        current_id = id(current)
+        if current_id in seen:
+            continue
+        seen.add(current_id)
+        yield current
+
+        if current.__cause__ is not None:
+            stack.append(current.__cause__)
+        if current.__context__ is not None:
+            stack.append(current.__context__)
+        for arg in current.args:
+            if isinstance(arg, BaseException):
+                stack.append(arg)
+
+
+def _is_read_timeout_error(exc: BaseException) -> bool:
+    """Detect read timeouts across requests/urllib3 exception wrappers."""
+    timeout_types = (
+        requests.exceptions.ReadTimeout,
+        requests.exceptions.Timeout,
+        ReadTimeoutError,
+        socket.timeout,
+    )
+    return any(isinstance(current, timeout_types) for current in _iter_exception_chain(exc))
 
 
 class InvalidStatusCodeError(requests.RequestException):
@@ -95,9 +130,13 @@ class EventSource:
     :param reconnection_time: wait time before try to reconnect in case
         connection broken
     :param max_connect_retry: maximum number of retries to connect
-    :param timeout: how long to wait for the server to send data before giving up,
-        I recommend that you set a reasonable value based on actual needs, which will improve stability,
-        see https://docs.python-requests.org/en/latest/user/quickstart/#timeouts for more information
+    :param timeout: how long to wait for the server to send the next bytes of
+        the stream before raising a timeout to the caller. ``None`` disables
+        the timeout. For long idle streams, prefer no timeout or periodic
+        heartbeat comments from the server. After a timeout, the current
+        stream is closed and the caller may reconnect explicitly. See
+        https://docs.python-requests.org/en/latest/user/quickstart/#timeouts
+        for more information
     :param session: specifies a requests.Session, if not, create
         a default requests.Session
     :param on_open: event handler for open event
@@ -109,7 +148,8 @@ class EventSource:
 
     :raises InvalidStatusCodeError: if status code is not 200
     :raises InvalidContentTypeError: if content type is not 'text/event-stream'
-    :raises requests.RequestException: if connection failed
+    :raises requests.RequestException: if connection failed, or if reading the
+        event stream timed out
     """
 
     def __init__(
@@ -189,6 +229,13 @@ class EventSource:
     def __iter__(self):
         return self
 
+    def _reset_connection(self) -> None:
+        """Close the active response and clear stream iteration state."""
+        if self._response is not None:
+            self._response.close()
+            self._response = None
+            self._data_generator = None
+
     def __next__(self) -> MessageEvent:
         """Process events"""
         if self._ready_state == ReadyState.CLOSED:
@@ -209,6 +256,19 @@ class EventSource:
                     self._event_data = None
                     break
                 except requests.RequestException as e:
+                    if _is_read_timeout_error(e):
+                        _LOGGER.debug(
+                            "Read timeout while waiting for event data at %s; "
+                            "propagating to caller",
+                            self._url,
+                            exc_info=e,
+                        )
+                        self._event_type = None
+                        self._event_data = None
+                        self._ready_state = ReadyState.CONNECTING
+                        self._reset_connection()
+                        raise
+
                     _LOGGER.debug(
                         "Failed to read next line from event stream at %s: %s",
                         self._url,
@@ -343,10 +403,7 @@ class EventSource:
         """
         _LOGGER.debug("close")
         self._ready_state = ReadyState.CLOSED
-        if self._response is not None:
-            self._response.close()
-            self._response = None
-            self._data_generator = None
+        self._reset_connection()
         if self._need_close_session:
             self._session.close()
 
