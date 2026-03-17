@@ -192,10 +192,13 @@ class EventSource:
 
     def __next__(self) -> MessageEvent:
         """Process events"""
-        if not self._response:
+        if self._ready_state == ReadyState.CLOSED:
+            raise StopIteration
+
+        if self._response is None:
             raise ValueError("response is None")
 
-        if not self._data_generator:
+        if self._data_generator is None:
             raise ValueError("data_generator is None")
 
         while True:
@@ -243,14 +246,21 @@ class EventSource:
                     self._process_field(field_name, field_value)
                 else:
                     self._process_field(line, "")
+            if self._ready_state == ReadyState.CLOSED:
+                raise StopIteration
+
             self._ready_state = ReadyState.CONNECTING
             if self._on_error:
                 self._on_error()
+            if self._ready_state == ReadyState.CLOSED:
+                raise StopIteration
             self._reconnection_time *= 2
             _LOGGER.debug(
                 "wait %s seconds for reconnect", self._reconnection_time.total_seconds()
             )
             time.sleep(self._reconnection_time.total_seconds())
+            if self._ready_state == ReadyState.CLOSED:
+                raise StopIteration
             self.connect(self._max_connect_retry)
 
     def connect(self, retry: int = 0) -> None:
