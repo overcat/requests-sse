@@ -263,64 +263,76 @@ class EventSource:
 
     def connect(self, retry: int = 0) -> None:
         """Connect to resource."""
-        _LOGGER.debug(f"connect, retry={retry}")
+        remaining_retries = retry
 
-        if self._last_event_id != "":
-            self._kwargs["headers"]["Last-Event-Id"] = self._last_event_id
+        while True:
+            _LOGGER.debug(f"connect, retry={remaining_retries}")
 
-        try:
-            response = self._session.request(
-                method=self._method,
-                url=self.url,
-                stream=True,
-                timeout=self._timeout,
-                **self._kwargs,
-            )
-        except requests.RequestException:
-            if retry <= 0 or self._ready_state == ReadyState.CLOSED:
-                self._fail_connect()
-                raise
-            else:
+            if self._last_event_id != "":
+                self._kwargs["headers"]["Last-Event-Id"] = self._last_event_id
+
+            try:
+                response = self._session.request(
+                    method=self._method,
+                    url=self.url,
+                    stream=True,
+                    timeout=self._timeout,
+                    **self._kwargs,
+                )
+            except requests.RequestException:
+                if remaining_retries <= 0 or self._ready_state == ReadyState.CLOSED:
+                    self._fail_connect()
+                    raise
+
                 self._ready_state = ReadyState.CONNECTING
                 if self._on_error:
                     self._on_error()
+                if self._ready_state == ReadyState.CLOSED:
+                    self._fail_connect()
+                    raise
+
                 _LOGGER.debug(
-                    "wait %s seconds for retry", self._reconnection_time.total_seconds()
+                    "wait %s seconds for retry",
+                    self._reconnection_time.total_seconds(),
                 )
                 time.sleep(self._reconnection_time.total_seconds())
-                self.connect(retry - 1)
+                if self._ready_state == ReadyState.CLOSED:
+                    self._fail_connect()
+                    raise
+                remaining_retries -= 1
+                continue
+
+            if response.status_code != 200:
+                error_message = "fetch {} failed with wrong response status: {}".format(
+                    self._url, response.status_code
+                )
+                self._fail_connect()
+                raise InvalidStatusCodeError(
+                    response.status_code, error_message, response=response
+                )
+
+            content_type = response.headers.get("Content-Type")
+            # Per the WHATWG spec, we only check the MIME type essence (type/subtype),
+            # ignoring parameters like charset.
+            # See https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
+            if (
+                not content_type
+                or content_type.lower().split(";")[0].strip()
+                != _CONTENT_TYPE_EVENT_STREAM
+            ):
+                error_message = "fetch {} failed with wrong Content-Type: {}".format(
+                    self._url, response.headers.get("Content-Type")
+                )
+                self._fail_connect()
+                raise InvalidContentTypeError(
+                    content_type, error_message, response=response
+                )
+            self._connected()
+            self._response = response
+            self._data_generator = response.iter_lines()
+            self._origin = self._get_origin(response)
+            self._first_line = True
             return
-
-        if response.status_code != 200:
-            error_message = "fetch {} failed with wrong response status: {}".format(
-                self._url, response.status_code
-            )
-            self._fail_connect()
-            raise InvalidStatusCodeError(
-                response.status_code, error_message, response=response
-            )
-
-        content_type = response.headers.get("Content-Type")
-        # Per the WHATWG spec, we only check the MIME type essence (type/subtype),
-        # ignoring parameters like charset.
-        # See https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
-        if (
-            not content_type
-            or content_type.lower().split(";")[0].strip() != _CONTENT_TYPE_EVENT_STREAM
-        ):
-            error_message = "fetch {} failed with wrong Content-Type: {}".format(
-                self._url, response.headers.get("Content-Type")
-            )
-            self._fail_connect()
-            raise InvalidContentTypeError(
-                content_type, error_message, response=response
-            )
-        self._connected()
-        self._response = response
-        self._data_generator = response.iter_lines()
-        self._origin = self._get_origin(response)
-        self._first_line = True
-        return
 
     def close(self) -> None:
         """Close connection and session if needed.
