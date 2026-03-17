@@ -382,10 +382,9 @@ class EventSource:
             self._event_id = field_value
 
         elif field_name == "retry":
-            try:
-                retry_in_ms = int(field_value)
-                self._reconnection_time = timedelta(milliseconds=retry_in_ms)
-            except ValueError:
+            if field_value.isascii() and field_value.isdigit():
+                self._reconnection_time = timedelta(milliseconds=int(field_value))
+            else:
                 _LOGGER.debug("Received invalid retry value %s, ignore it", field_value)
 
     @staticmethod

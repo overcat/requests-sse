@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import Mock
 
 import requests
@@ -33,3 +34,16 @@ def test_strip_only_one_leading_space_from_field_value():
 
     assert event.data == " two spaces"
     source.close()
+
+
+def test_retry_field_only_accepts_ascii_digits():
+    source = EventSource("http://example.com/sse")
+    source._reconnection_time = timedelta(seconds=5)
+
+    for field_value in ("-1", "+5", "abc"):
+        source._process_field("retry", field_value)
+        assert source._reconnection_time == timedelta(seconds=5)
+
+    source._process_field("retry", "3000")
+
+    assert source._reconnection_time == timedelta(seconds=3)
