@@ -47,3 +47,12 @@ def test_retry_field_only_accepts_ascii_digits():
     source._process_field("retry", "3000")
 
     assert source._reconnection_time == timedelta(seconds=3)
+
+
+def test_id_field_rejects_values_containing_null():
+    source = EventSource("http://example.com/sse")
+    source._event_id = "existing-id"
+
+    source._process_field("id", "abc\x00def")
+
+    assert source._event_id == "existing-id"
