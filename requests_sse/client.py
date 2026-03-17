@@ -158,6 +158,7 @@ class EventSource:
         self._origin: Optional[str] = None
         self._response: Optional[requests.Response] = None
         self._data_generator: Optional[Iterator] = None
+        self._first_line = True
 
         self._method = method
 
@@ -216,6 +217,10 @@ class EventSource:
                     break
 
                 line: str = line_in_bytes.decode("utf8")
+                if self._first_line:
+                    if line.startswith("\ufeff"):
+                        line = line[1:]
+                    self._first_line = False
                 line = line.rstrip("\n").rstrip("\r")
 
                 if line == "":
@@ -306,6 +311,8 @@ class EventSource:
         self._response = response
         self._data_generator = response.iter_lines()
         self._origin = self._get_origin(response)
+        self._first_line = True
+        return
 
     def close(self) -> None:
         """Close connection and session if needed.
