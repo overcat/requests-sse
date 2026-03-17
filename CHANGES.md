@@ -2,7 +2,16 @@
 
 ## Unreleased
 
-- fix: propagate read timeouts to callers instead of silently reconnecting during stream consumption.
+- fix: align SSE field parsing with the WHATWG event stream rules by stripping
+  only one optional leading space, accepting only ASCII digits in `retry`,
+  rejecting `id` values containing NUL characters, and ignoring a leading BOM.
+- fix: make `MessageEvent.data` and `MessageEvent.type` always strings, and
+  apply the default `message` event type at dispatch time.
+- fix: stop iteration cleanly after `EventSource.close()`, keep reconnection
+  delays fixed during stream reconnects, and retry connection attempts in a
+  loop instead of recursion.
+- fix: propagate read timeouts to callers instead of silently reconnecting
+  during stream consumption.
 
 ## Version 0.5.3
 
