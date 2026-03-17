@@ -1,5 +1,5 @@
 from datetime import timedelta
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import requests
 
@@ -56,3 +56,29 @@ def test_id_field_rejects_values_containing_null():
     source._process_field("id", "abc\x00def")
 
     assert source._event_id == "existing-id"
+
+
+def test_bom_is_ignored_at_start_of_stream():
+    source = make_connected_source([b"\xef\xbb\xbfdata:hello", b""])
+
+    event = next(source)
+
+    assert event.data == "hello"
+    source.close()
+
+
+@patch("requests_sse.client.time.sleep")
+def test_bom_is_ignored_after_reconnect(mock_sleep):
+    session = Mock(spec=requests.Session)
+    session.request.side_effect = [
+        make_mock_response([b"data:first", b""]),
+        make_mock_response([b"\xef\xbb\xbfdata:second", b""]),
+        make_mock_response([b"data:third", b""]),
+    ]
+    source = EventSource("http://example.com/sse", session=session)
+    source.connect()
+
+    assert next(source).data == "first"
+    assert next(source).data == "second"
+    mock_sleep.assert_called_once_with(5.0)
+    source.close()
