@@ -1,5 +1,9 @@
 # Changes
 
+## Unreleased
+
+- fix: propagate read timeouts to callers instead of silently reconnecting during stream consumption.
+
 ## Version 0.5.3
 
 Released 2026-03-11
