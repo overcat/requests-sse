@@ -59,9 +59,9 @@ class MessageEvent:
     See `Event types <https://javascript.info/server-sent-events#event-types>` for more information.
     """
 
-    type: Optional[str]
+    type: str
     """A string representing the type of event."""
-    data: Optional[str]
+    data: str
     """The data sent by the message emitter."""
     origin: str
     """A string representing the message emitter."""
