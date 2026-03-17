@@ -141,7 +141,6 @@ class EventSource:
         self._on_error = on_error
 
         self._reconnection_time = reconnection_time
-        self._orginal_reconnection_time = reconnection_time
         self._max_connect_retry = max_connect_retry
         self._timeout = timeout
         self._last_event_id = "" if latest_event_id is None else latest_event_id
@@ -254,7 +253,6 @@ class EventSource:
                 self._on_error()
             if self._ready_state == ReadyState.CLOSED:
                 raise StopIteration
-            self._reconnection_time *= 2
             _LOGGER.debug(
                 "wait %s seconds for reconnect", self._reconnection_time.total_seconds()
             )
@@ -286,7 +284,6 @@ class EventSource:
                 self._ready_state = ReadyState.CONNECTING
                 if self._on_error:
                     self._on_error()
-                self._reconnection_time *= 2
                 _LOGGER.debug(
                     "wait %s seconds for retry", self._reconnection_time.total_seconds()
                 )
@@ -347,7 +344,6 @@ class EventSource:
             self._ready_state = ReadyState.OPEN
             if self._on_open:
                 self._on_open()
-        self._reconnection_time = self._orginal_reconnection_time
 
     def _fail_connect(self):
         """Announce the connection is failed."""
