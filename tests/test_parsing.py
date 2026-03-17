@@ -81,4 +81,12 @@ def test_bom_is_ignored_after_reconnect(mock_sleep):
     assert next(source).data == "first"
     assert next(source).data == "second"
     mock_sleep.assert_called_once_with(5.0)
+
+
+def test_default_event_type_is_message_when_dispatching():
+    source = make_connected_source([b"data:hello", b""])
+
+    event = next(source)
+
+    assert event.type == "message"
     source.close()
