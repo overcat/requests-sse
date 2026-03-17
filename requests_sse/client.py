@@ -378,7 +378,7 @@ class EventSource:
                 self._event_data += field_value
             self._event_data += "\n"
 
-        elif field_name == "id" and field_value not in ("\u0000", "\x00\x00"):
+        elif field_name == "id" and "\u0000" not in field_value:
             self._event_id = field_value
 
         elif field_name == "retry":
