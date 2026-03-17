@@ -233,7 +233,7 @@ class EventSource:
                     # contains ':'
                     fields = line.split(":", 1)
                     field_name = fields[0]
-                    field_value = fields[1].lstrip(" ")
+                    field_value = fields[1][1:] if fields[1].startswith(" ") else fields[1]
                     self._process_field(field_name, field_value)
                 else:
                     self._process_field(line, "")
