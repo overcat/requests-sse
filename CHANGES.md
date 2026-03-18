@@ -1,6 +1,6 @@
 # Changes
 
-## Unreleased
+## Version 0.6.0b0
 
 - fix: align SSE field parsing with the WHATWG event stream rules by stripping
   only one optional leading space, accepting only ASCII digits in `retry`,
