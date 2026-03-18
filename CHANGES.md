@@ -12,6 +12,11 @@
   loop instead of recursion.
 - fix: propagate read timeouts to callers instead of silently reconnecting
   during stream consumption.
+  Behavior change: a `timeout` reached while waiting for the next bytes of an
+  open event stream now raises a request exception to the caller instead of
+  silently reconnecting. If you relied on the previous behavior for long idle
+  streams, increase or disable `timeout`, send heartbeat comments from the
+  server, or catch the timeout and call `connect()` explicitly to retry.
 
 ## Version 0.5.3
 
